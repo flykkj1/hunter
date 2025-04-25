@@ -1,0 +1,22 @@
+-- Função para alterar o cooldown das habilidades do Rank ??? Hunter para 1 segundo
+local function setCooldownToOneSecond(skillName)
+    local replicatedStorage = game:GetService("ReplicatedStorage")
+    local skills = replicatedStorage:FindFirstChild("Skills")
+
+    if skills then
+        for _, skill in pairs(skills:GetChildren()) do
+            if skill.Name == skillName then
+                local cooldown = skill:FindFirstChild("Cooldown")
+                if cooldown then
+                    cooldown.Value = 1 -- Define o cooldown para 1 segundo
+                end
+            end
+        end
+    end
+end
+
+-- Alterar o cooldown de todas as habilidades para 1 segundo
+setCooldownToOneSecond("AstralCut")    -- Habilidade 1
+setCooldownToOneSecond("AstralBreak")  -- Habilidade 2
+setCooldownToOneSecond("AsteriskSlash") -- Habilidade 3
+setCooldownToOneSecond("AstralLine")   -- Habilidade 4 (caso exista)
