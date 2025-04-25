@@ -1,13 +1,13 @@
--- Tabela de configurações para alterar atributos do personagem no Anime Dimensions
+-- Tabela de configurações detalhadas do personagem no Anime Dimensions
 local playerSettings = {
-    movementSpeed = {enabled = true, value = 100, description = "Velocidade de movimento"},
-    jumpHeight = {enabled = true, value = 150, description = "Altura do pulo"},
-    gravity = {enabled = true, value = 50, description = "Gravidade"},
-    skillCooldown = {enabled = true, value = 0.1, description = "Cooldown das habilidades"},
-    dashCooldown = {enabled = true, value = 0.1, description = "Cooldown do Dash"}
+    movementSpeed = {enabled = true, value = 100, description = "Velocidade de movimento", min = 16, max = 200},
+    jumpHeight = {enabled = true, value = 50, description = "Altura do pulo", min = 50, max = 200},
+    gravity = {enabled = true, value = 196.2, description = "Gravidade", min = 0, max = 500},
+    skillCooldown = {enabled = true, value = 0.1, description = "Cooldown das habilidades", min = 0, max = 10},
+    dashCooldown = {enabled = true, value = 0.5, description = "Cooldown do Dash", min = 0, max = 10}
 }
 
--- Função para aplicar as alterações no personagem
+-- Função para aplicar as configurações no personagem
 local function applyCharacterSettings(player)
     local character = player.Character
     if not character or not character:FindFirstChild("Humanoid") then
@@ -55,7 +55,7 @@ local function applyCharacterSettings(player)
     end
 end
 
--- Função para alterar configurações dinamicamente
+-- Função para alterar as configurações dinamicamente
 local function updateSettings(setting, value)
     if playerSettings[setting] then
         playerSettings[setting].enabled = value
@@ -69,17 +69,46 @@ local function updateSettings(setting, value)
     end
 end
 
--- Função para criar a GUI de opções (interação do usuário)
+-- Função para criar uma tabela de opções movível
 local function createOptionsGUI(player)
     -- Criar a GUI principal
     local screenGui = Instance.new("ScreenGui")
     screenGui.Parent = player:WaitForChild("PlayerGui")
 
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 400, 0, 300)
-    frame.Position = UDim2.new(0.5, -200, 0.5, -150)
+    frame.Size = UDim2.new(0, 400, 0, 500)
+    frame.Position = UDim2.new(0.5, -200, 0.5, -250)
     frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     frame.Parent = screenGui
+
+    -- Habilitar movimentação da tabela
+    local dragInput = Instance.new("TextButton")
+    dragInput.Size = UDim2.new(1, 0, 0, 25)
+    dragInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    dragInput.Text = "Arraste-me para mover"
+    dragInput.Parent = frame
+
+    local dragStartPos = nil
+    local dragStartMouse = nil
+
+    dragInput.MouseButton1Down:Connect(function(input)
+        dragStartPos = frame.Position
+        dragStartMouse = input.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragStartPos = nil
+                dragStartMouse = nil
+            end
+        end)
+    end)
+
+    -- Função para mover a tabela com o mouse
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if dragStartPos then
+            local delta = input.Position - dragStartMouse
+            frame.Position = UDim2.new(dragStartPos.X.Scale, delta.X, dragStartPos.Y.Scale, delta.Y)
+        end
+    end)
 
     local uiListLayout = Instance.new("UIListLayout")
     uiListLayout.Parent = frame
@@ -104,7 +133,7 @@ local function createOptionsGUI(player)
     end
 end
 
--- Função para aplicar configurações iniciais ao jogador
+-- Função para aplicar as configurações iniciais ao jogador
 local function initializeSettings(player)
     -- Aplicar configurações iniciais
     applyCharacterSettings(player)
