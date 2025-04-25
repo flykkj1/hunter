@@ -1,0 +1,82 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+-- DESTACAR TODOS EM VERMELHO
+local function highlightPlayer(player)
+    local function applyHighlight()
+        local char = player.Character
+        if not char or char:FindFirstChild("Highlight_Red") then return end
+
+        local highlight = Instance.new("Highlight")
+        highlight.Name = "Highlight_Red"
+        highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Vermelho
+        highlight.OutlineColor = Color3.new(1, 0, 0)
+        highlight.FillTransparency = 0.1
+        highlight.OutlineTransparency = 0
+        highlight.Adornee = char
+        highlight.Parent = char
+    end
+
+    if player.Character then applyHighlight() end
+    player.CharacterAdded:Connect(function()
+        wait(1)
+        applyHighlight()
+    end)
+end
+
+-- Aplica o destaque a todos os jogadores
+for _, p in pairs(Players:GetPlayers()) do
+    if p ~= LocalPlayer then
+        highlightPlayer(p)
+    end
+end
+Players.PlayerAdded:Connect(function(p)
+    if p ~= LocalPlayer then
+        highlightPlayer(p)
+    end
+end)
+
+-- AUTO HEADSHOT SIMPLES (SILENT AIM)
+-- Redireciona raycast/disparo para a "Head" do oponente mais próximo da mira
+local function getClosestHead()
+    local cam = workspace.CurrentCamera
+    local closestPart = nil
+    local shortestDistance = math.huge
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+            local head = player.Character.Head
+            local screenPoint, onScreen = cam:WorldToViewportPoint(head.Position)
+            if onScreen then
+                local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - Vector2.new(cam.ViewportSize.X/2, cam.ViewportSize.Y/2)).Magnitude
+                if distance < shortestDistance then
+                    shortestDistance = distance
+                    closestPart = head
+                end
+            end
+        end
+    end
+
+    return closestPart
+end
+
+-- Hook para redirecionar o alvo dos tiros
+-- Este exemplo genérico assume que seu jogo usa um Raycast ou Remote para atirar
+-- Isso precisa ser adaptado para o sistema de disparo do jogo
+local oldNamecall
+oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+    local args = {...}
+    local method = getnamecallmethod()
+
+    -- Exemplo genérico: detecta RemoteEvent de tiro e altera o alvo
+    if method == "FireServer" and tostring(self):lower():find("shoot") then
+        local head = getClosestHead()
+        if head then
+            args[1] = head.Position -- substitui o argumento de posição pelo da cabeça
+            return oldNamecall(self, unpack(args))
+        end
+    end
+
+    return oldNamecall(self, ...)
+end)
