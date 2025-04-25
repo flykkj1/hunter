@@ -1,49 +1,67 @@
--- Script para reduzir o cooldown das skills com novos nomes
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UseSkill = ReplicatedStorage:WaitForChild("UseSkill")
-local Players = game:GetService("Players")
-
--- Renomeando as skills e configurando os cooldowns
-local skillCooldowns = {
-    ["Astral Cut"] = 0.1,   -- Cooldown reduzido para Astral Cut
-    ["Astral Break"] = 0.1, -- Cooldown reduzido para Astral Break
-    ["Asterisk Slash"] = 0.1, -- Cooldown reduzido para Asterisk Slash
+-- Tabela de configurações para alterar atributos do personagem no Anime Dimensions
+local playerSettings = {
+    movementSpeed = 100,   -- Velocidade de movimento (padrão 100)
+    jumpHeight = 150,      -- Altura do pulo (padrão 150)
+    gravity = 50,          -- Gravidade (padrão 50)
+    skillCooldown = 0.1,   -- Cooldown das habilidades (padrão 0.1 segundos)
 }
 
-local DEFAULT_COOLDOWN = 1
+-- Função para aplicar as alterações no personagem
+local function applyCharacterSettings(player)
+    local character = player.Character
+    if not character or not character:FindFirstChild("Humanoid") then
+        return
+    end
 
--- Função para ativar a skill com cooldown reduzido
-local function activateSkill(player, skillName)
-    local cooldown = skillCooldowns[skillName] or DEFAULT_COOLDOWN
+    local humanoid = character:FindFirstChild("Humanoid")
+    
+    -- Alterar a velocidade de movimento
+    humanoid.WalkSpeed = playerSettings.movementSpeed
+    
+    -- Alterar a altura do pulo
+    humanoid.JumpHeight = playerSettings.jumpHeight
 
-    -- Verifica se o personagem do jogador é o Rank ??? Hunter
-    if player.Character and player.Character:FindFirstChild("Rank ??? Hunter") then
-        local now = tick()
-        local cooldowns = player:FindFirstChild("Cooldowns") or Instance.new("Folder")
-        cooldowns.Name = "Cooldowns"
-        cooldowns.Parent = player
+    -- Alterar a gravidade
+    game:GetService("Workspace").Gravity = playerSettings.gravity
 
-        local lastUse = cooldowns:FindFirstChild(skillName) or Instance.new("IntValue")
-        lastUse.Name = skillName
-        lastUse.Parent = cooldowns
-
-        if now - lastUse.Value < cooldown then
-            warn(player.Name .. " tentou usar a skill '" .. skillName .. "' antes do cooldown!")
-            return
+    -- Alterar o cooldown das skills
+    -- Aqui assumimos que há uma tabela ou métodos para habilidades que precisam ser ajustados
+    local replicatedStorage = game:GetService("ReplicatedStorage")
+    local skills = replicatedStorage:FindFirstChild("Skills")
+    if skills then
+        for _, skill in pairs(skills:GetChildren()) do
+            if skill:IsA("StringValue") then
+                -- Supondo que cada skill tenha uma propriedade de cooldown (modificar conforme necessário)
+                local cooldown = skill:FindFirstChild("Cooldown")
+                if cooldown then
+                    cooldown.Value = playerSettings.skillCooldown
+                end
+            end
         end
-
-        lastUse.Value = now
-        print(player.Name .. " usou a skill " .. skillName .. " com cooldown de " .. cooldown .. " segundos.")
-        
-        -- Aqui você pode adicionar a lógica real da skill, visualizações, efeitos, etc.
-        UseSkill:FireServer(skillName)  -- Executa a skill
-    else
-        warn(player.Name .. " não é o Rank ??? Hunter ou não tem o personagem correto!")
     end
 end
 
--- Testando a função para o jogador
-local player = Players.LocalPlayer
-activateSkill(player, "Astral Cut")
-activateSkill(player, "Astral Break")
-activateSkill(player, "Asterisk Slash")
+-- Função para alterar configurações dinamicamente
+local function updateSettings(setting, value)
+    if playerSettings[setting] then
+        playerSettings[setting] = value
+        print("Configuração alterada: " .. setting .. " = " .. value)
+        
+        -- Aplicar as novas configurações imediatamente
+        local player = game.Players.LocalPlayer
+        applyCharacterSettings(player)
+    else
+        warn("Configuração não válida!")
+    end
+end
+
+-- Função de exemplo para aplicar as configurações automaticamente ao jogador
+local player = game.Players.LocalPlayer
+applyCharacterSettings(player)
+
+-- Testar as mudanças
+-- Altere os valores dinamicamente, como:
+updateSettings("movementSpeed", 150)  -- Aumentar a velocidade do personagem
+updateSettings("jumpHeight", 200)     -- Aumentar a altura do pulo
+updateSettings("gravity", 25)         -- Diminuir a gravidade
+updateSettings("skillCooldown", 0.05) -- Diminuir o cooldown das skills
