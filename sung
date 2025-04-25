@@ -1,0 +1,58 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Tools = character:GetChildren()
+
+-- Defina os personagens e as habilidades que você quer modificar
+local charactersToModify = {
+    "Rank ??? Hunter",  -- Adicione os nomes dos personagens que você deseja modificar
+}
+
+local skillsToModify = {
+    "Astral Cut",
+    "Astral Break",
+    "Asterisk Slash",
+    "Astral Line",  -- Adicione os nomes das habilidades que você quer modificar
+}
+
+-- Função para alterar o cooldown das habilidades
+local function modifyCooldown(tool)
+    -- Verifica se a ferramenta possui uma habilidade que pode ser modificada
+    for _, skillName in pairs(skillsToModify) do
+        if tool.Name == skillName then
+            -- Modificar o cooldown
+            local cooldownValue = tool:FindFirstChild("Cooldown")
+            if cooldownValue then
+                cooldownValue.Value = 1  -- Define o cooldown para 1 segundo
+            end
+        end
+    end
+end
+
+-- Função para aplicar a modificação aos personagens
+local function modifyCharacterCooldown(character)
+    if not character or not character:FindFirstChild("Humanoid") then return end
+    
+    for _, tool in pairs(character:GetChildren()) do
+        if tool:IsA("Tool") then
+            -- Verifica se o nome do personagem está na lista
+            if table.find(charactersToModify, character.Name) then
+                modifyCooldown(tool)
+            end
+        end
+    end
+end
+
+-- Aplica a modificação ao personagem assim que ele for adicionado
+Players.PlayerAdded:Connect(function(player)
+    if player == LocalPlayer then
+        player.CharacterAdded:Connect(function(character)
+            modifyCharacterCooldown(character)
+        end)
+    end
+end)
+
+-- Aplica imediatamente se o personagem já estiver carregado
+if LocalPlayer.Character then
+    modifyCharacterCooldown(LocalPlayer.Character)
+end
