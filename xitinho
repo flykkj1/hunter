@@ -1,0 +1,66 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- Diminui a opacidade de todos os jogadores (exceto o seu)
+local function applyTransparency(player)
+    local function makeTransparent()
+        local char = player.Character
+        if not char then return end
+
+        for _, part in ipairs(char:GetDescendants()) do
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                part.Transparency = 0.5
+                part.LocalTransparencyModifier = 0.5
+            end
+        end
+    end
+
+    if player.Character then
+        makeTransparent()
+    end
+    player.CharacterAdded:Connect(function()
+        wait(1)
+        makeTransparent()
+    end)
+end
+
+-- Aplica a todos os jogadores atuais
+for _, player in pairs(Players:GetPlayers()) do
+    if player ~= LocalPlayer then
+        applyTransparency(player)
+    end
+end
+
+-- Aplica a novos jogadores
+Players.PlayerAdded:Connect(function(player)
+    if player ~= LocalPlayer then
+        applyTransparency(player)
+    end
+end)
+
+-- Sistema para tentar remover recoil (padrão comum em FPS de Roblox)
+-- Verifica constantemente se há uma arma equipada e remove o recoil
+spawn(function()
+    while true do
+        local character = LocalPlayer.Character
+        if character and character:FindFirstChildOfClass("Tool") then
+            local tool = character:FindFirstChildOfClass("Tool")
+            for _, obj in pairs(tool:GetDescendants()) do
+                if obj:IsA("NumberValue") and obj.Name:lower():find("recoil") then
+                    obj.Value = 0
+                elseif obj:IsA("ModuleScript") then
+                    -- Tentativa de remover recoil por código em módulo
+                    local success, result = pcall(require, obj)
+                    if success and type(result) == "table" then
+                        for k, v in pairs(result) do
+                            if type(v) == "number" and tostring(k):lower():find("recoil") then
+                                result[k] = 0
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        wait(0.5)
+    end
+end)
