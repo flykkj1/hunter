@@ -1,3 +1,17 @@
+-- Função para verificar se o jogador é o personagem "Rank ??? Hunter"
+local function isRankHunter(player)
+    local character = player.Character
+    if character and character:FindFirstChild("Humanoid") then
+        local humanoid = character:FindFirstChild("Humanoid")
+        local characterName = character.Name
+        -- Verifica se o nome do personagem é "Rank ??? Hunter"
+        if characterName == "Rank ??? Hunter" then
+            return true
+        end
+    end
+    return false
+end
+
 -- Configurações do cooldown das habilidades do Rank ??? Hunter
 local playerSettings = {
     skillCooldowns = {
@@ -10,6 +24,11 @@ local playerSettings = {
 
 -- Função para aplicar as configurações de cooldown
 local function applyCharacterSettings(player)
+    if not isRankHunter(player) then
+        print("Este personagem não é o 'Rank ??? Hunter'. Não será possível aplicar as configurações.")
+        return
+    end
+    
     local replicatedStorage = game:GetService("ReplicatedStorage")
     local skills = replicatedStorage:FindFirstChild("Skills")
     if skills then
@@ -112,11 +131,15 @@ end
 
 -- Função para aplicar as configurações iniciais ao jogador
 local function initializeSettings(player)
-    -- Aplicar configurações iniciais
-    applyCharacterSettings(player)
-
-    -- Criar a interface de opções
-    createOptionsGUI(player)
+    -- Verificar se o jogador é o Rank ??? Hunter
+    if isRankHunter(player) then
+        -- Aplicar configurações iniciais
+        applyCharacterSettings(player)
+        -- Criar a interface de opções
+        createOptionsGUI(player)
+    else
+        print("Este não é o personagem 'Rank ??? Hunter'. As configurações não serão aplicadas.")
+    end
 end
 
 -- Inicializar as configurações e a interface quando o jogador entra
