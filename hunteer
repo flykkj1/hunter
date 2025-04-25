@@ -1,0 +1,49 @@
+-- Script para reduzir o cooldown das skills de Rank ??? Hunter
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UseSkill = ReplicatedStorage:WaitForChild("UseSkill")
+local Players = game:GetService("Players")
+
+local rankHunterCooldown = {
+    ["Skill1"] = 0.1,  -- Cooldown de Skill1 reduzido para 0.1 segundos
+    ["Skill2"] = 0.1,  -- Cooldown de Skill2 reduzido para 0.1 segundos
+    ["Skill3"] = 0.1,  -- Cooldown de Skill3 reduzido para 0.1 segundos
+}
+
+local DEFAULT_COOLDOWN = 1
+
+-- Função para ativar a skill com cooldown reduzido
+local function activateSkill(player, skillName)
+    local cooldown = rankHunterCooldown[skillName] or DEFAULT_COOLDOWN
+
+    -- Verifica se o personagem do jogador é o Rank ??? Hunter
+    if player.Character and player.Character:FindFirstChild("Rank ??? Hunter") then
+        local now = tick()
+        local cooldowns = player:FindFirstChild("Cooldowns") or Instance.new("Folder")
+        cooldowns.Name = "Cooldowns"
+        cooldowns.Parent = player
+
+        local lastUse = cooldowns:FindFirstChild(skillName) or Instance.new("IntValue")
+        lastUse.Name = skillName
+        lastUse.Parent = cooldowns
+
+        if now - lastUse.Value < cooldown then
+            warn(player.Name .. " tentou usar a skill '" .. skillName .. "' antes do cooldown!")
+            return
+        end
+
+        lastUse.Value = now
+        print(player.Name .. " usou a skill " .. skillName .. " com cooldown de " .. cooldown .. " segundos.")
+        
+        -- Aqui você pode adicionar a lógica real da skill, visualizações, efeitos, etc.
+        UseSkill:FireServer(skillName)  -- Executa a skill
+    else
+        warn(player.Name .. " não é o Rank ??? Hunter ou não tem o personagem correto!")
+    end
+end
+
+-- Testando a função para o jogador
+local player = Players.LocalPlayer
+activateSkill(player, "Skill1")
+activateSkill(player, "Skill2")
+activateSkill(player, "Skill3")
