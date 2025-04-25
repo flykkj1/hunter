@@ -1,9 +1,9 @@
 -- Tabela de configurações para alterar atributos do personagem no Anime Dimensions
 local playerSettings = {
-    movementSpeed = 100,   -- Velocidade de movimento (padrão 100)
-    jumpHeight = 150,      -- Altura do pulo (padrão 150)
-    gravity = 50,          -- Gravidade (padrão 50)
-    skillCooldown = 0.1,   -- Cooldown das habilidades (padrão 0.1 segundos)
+    movementSpeed = {enabled = true, value = 100},   -- Velocidade de movimento (padrão 100)
+    jumpHeight = {enabled = true, value = 150},      -- Altura do pulo (padrão 150)
+    gravity = {enabled = true, value = 50},          -- Gravidade (padrão 50)
+    skillCooldown = {enabled = true, value = 0.1},   -- Cooldown das habilidades (padrão 0.1 segundos)
 }
 
 -- Função para aplicar as alterações no personagem
@@ -16,25 +16,29 @@ local function applyCharacterSettings(player)
     local humanoid = character:FindFirstChild("Humanoid")
     
     -- Alterar a velocidade de movimento
-    humanoid.WalkSpeed = playerSettings.movementSpeed
+    if playerSettings.movementSpeed.enabled then
+        humanoid.WalkSpeed = playerSettings.movementSpeed.value
+    end
     
     -- Alterar a altura do pulo
-    humanoid.JumpHeight = playerSettings.jumpHeight
+    if playerSettings.jumpHeight.enabled then
+        humanoid.JumpHeight = playerSettings.jumpHeight.value
+    end
 
     -- Alterar a gravidade
-    game:GetService("Workspace").Gravity = playerSettings.gravity
+    if playerSettings.gravity.enabled then
+        game:GetService("Workspace").Gravity = playerSettings.gravity.value
+    end
 
     -- Alterar o cooldown das skills
-    -- Aqui assumimos que há uma tabela ou métodos para habilidades que precisam ser ajustados
     local replicatedStorage = game:GetService("ReplicatedStorage")
     local skills = replicatedStorage:FindFirstChild("Skills")
-    if skills then
+    if skills and playerSettings.skillCooldown.enabled then
         for _, skill in pairs(skills:GetChildren()) do
             if skill:IsA("StringValue") then
-                -- Supondo que cada skill tenha uma propriedade de cooldown (modificar conforme necessário)
                 local cooldown = skill:FindFirstChild("Cooldown")
                 if cooldown then
-                    cooldown.Value = playerSettings.skillCooldown
+                    cooldown.Value = playerSettings.skillCooldown.value
                 end
             end
         end
@@ -44,8 +48,8 @@ end
 -- Função para alterar configurações dinamicamente
 local function updateSettings(setting, value)
     if playerSettings[setting] then
-        playerSettings[setting] = value
-        print("Configuração alterada: " .. setting .. " = " .. value)
+        playerSettings[setting].enabled = value
+        print("Configuração alterada: " .. setting .. " = " .. tostring(value))
         
         -- Aplicar as novas configurações imediatamente
         local player = game.Players.LocalPlayer
@@ -55,13 +59,80 @@ local function updateSettings(setting, value)
     end
 end
 
--- Função de exemplo para aplicar as configurações automaticamente ao jogador
-local player = game.Players.LocalPlayer
-applyCharacterSettings(player)
+-- Função para criar a GUI de opções
+local function createOptionsGUI(player)
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Testar as mudanças
--- Altere os valores dinamicamente, como:
-updateSettings("movementSpeed", 150)  -- Aumentar a velocidade do personagem
-updateSettings("jumpHeight", 200)     -- Aumentar a altura do pulo
-updateSettings("gravity", 25)         -- Diminuir a gravidade
-updateSettings("skillCooldown", 0.05) -- Diminuir o cooldown das skills
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 300, 0, 200)
+    frame.Position = UDim2.new(0.5, -150, 0.5, -100)
+    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    frame.Parent = screenGui
+
+    local uiListLayout = Instance.new("UIListLayout")
+    uiListLayout.Parent = frame
+
+    -- Criar um botão para ativar/desativar a velocidade de movimento
+    local speedButton = Instance.new("TextButton")
+    speedButton.Size = UDim2.new(0, 250, 0, 30)
+    speedButton.Position = UDim2.new(0, 25, 0, 10)
+    speedButton.Text = "Ativar Velocidade de Movimento"
+    speedButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    speedButton.Parent = frame
+
+    speedButton.MouseButton1Click:Connect(function()
+        playerSettings.movementSpeed.enabled = not playerSettings.movementSpeed.enabled
+        speedButton.Text = playerSettings.movementSpeed.enabled and "Ativar Velocidade de Movimento" or "Desativar Velocidade de Movimento"
+        applyCharacterSettings(player)
+    end)
+
+    -- Criar um botão para ativar/desativar o pulo
+    local jumpButton = Instance.new("TextButton")
+    jumpButton.Size = UDim2.new(0, 250, 0, 30)
+    jumpButton.Position = UDim2.new(0, 25, 0, 50)
+    jumpButton.Text = "Ativar Altura do Pulo"
+    jumpButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    jumpButton.Parent = frame
+
+    jumpButton.MouseButton1Click:Connect(function()
+        playerSettings.jumpHeight.enabled = not playerSettings.jumpHeight.enabled
+        jumpButton.Text = playerSettings.jumpHeight.enabled and "Ativar Altura do Pulo" or "Desativar Altura do Pulo"
+        applyCharacterSettings(player)
+    end)
+
+    -- Criar um botão para ativar/desativar a gravidade
+    local gravityButton = Instance.new("TextButton")
+    gravityButton.Size = UDim2.new(0, 250, 0, 30)
+    gravityButton.Position = UDim2.new(0, 25, 0, 90)
+    gravityButton.Text = "Ativar Gravidade"
+    gravityButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    gravityButton.Parent = frame
+
+    gravityButton.MouseButton1Click:Connect(function()
+        playerSettings.gravity.enabled = not playerSettings.gravity.enabled
+        gravityButton.Text = playerSettings.gravity.enabled and "Ativar Gravidade" or "Desativar Gravidade"
+        applyCharacterSettings(player)
+    end)
+
+    -- Criar um botão para ativar/desativar o cooldown das skills
+    local cooldownButton = Instance.new("TextButton")
+    cooldownButton.Size = UDim2.new(0, 250, 0, 30)
+    cooldownButton.Position = UDim2.new(0, 25, 0, 130)
+    cooldownButton.Text = "Ativar Cooldown das Skills"
+    cooldownButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    cooldownButton.Parent = frame
+
+    cooldownButton.MouseButton1Click:Connect(function()
+        playerSettings.skillCooldown.enabled = not playerSettings.skillCooldown.enabled
+        cooldownButton.Text = playerSettings.skillCooldown.enabled and "Ativar Cooldown das Skills" or "Desativar Cooldown das Skills"
+        applyCharacterSettings(player)
+    end)
+end
+
+-- Função principal para iniciar a interface quando o jogador entra
+local player = game.Players.LocalPlayer
+createOptionsGUI(player)
+
+-- Aplicar as configurações iniciais
+applyCharacterSettings(player)
