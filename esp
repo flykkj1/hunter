@@ -1,0 +1,40 @@
+-- Função para criar ESP (Box + Nome) em todos os jogadores locais
+local function createESP(player)
+    local BillboardGui = Instance.new("BillboardGui")
+    BillboardGui.Name = "ESP_" .. player.Name
+    BillboardGui.Adornee = player.Character:WaitForChild("Head")
+    BillboardGui.Size = UDim2.new(0, 200, 0, 50)
+    BillboardGui.StudsOffset = Vector3.new(0, 3, 0)
+    BillboardGui.AlwaysOnTop = true
+    BillboardGui.Parent = player.Character
+
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Size = UDim2.new(1, 0, 1, 0)
+    nameLabel.Text = player.Name
+    nameLabel.TextColor3 = Color3.new(1, 0, 0) -- Vermelho
+    nameLabel.TextStrokeTransparency = 0.5
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.Font = Enum.Font.SourceSansBold
+    nameLabel.TextScaled = true
+    nameLabel.Parent = BillboardGui
+end
+
+-- Adiciona ESP a todos os jogadores exceto o LocalPlayer
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+for _, player in ipairs(Players:GetPlayers()) do
+    if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+        createESP(player)
+    end
+end
+
+-- Garante que novos jogadores também recebam ESP ao entrar no jogo
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        wait(1) -- Espera o personagem carregar
+        if player ~= LocalPlayer then
+            createESP(player)
+        end
+    end)
+end)
