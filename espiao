@@ -1,0 +1,25 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- Cria a interface acima da cabeça dos jogadores
+local function highlightPlayer(player)
+    local function addBillboard()
+        local char = player.Character
+        if not char or not char:FindFirstChild("Head") then return end
+
+        -- Evita duplicação
+        if char:FindFirstChild("ESP_NameTag") then return end
+
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "ESP_NameTag"
+        billboard.Adornee = char.Head
+        billboard.AlwaysOnTop = true
+        billboard.Size = UDim2.new(0, 200, 0, 30)
+        billboard.StudsOffset = Vector3.new(0, 2, 0)
+        billboard.Parent = char
+
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.Text = player.Name
+        label.TextColor3 = Color3.fromRGB(255, 50, 50)
