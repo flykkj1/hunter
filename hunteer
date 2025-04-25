@@ -5,9 +5,9 @@ local UseSkill = ReplicatedStorage:WaitForChild("UseSkill")
 local Players = game:GetService("Players")
 
 local rankHunterCooldown = {
-    ["Skill1"] = 0.1,  -- Cooldown de Skill1 reduzido para 0.1 segundos
-    ["Skill2"] = 0.1,  -- Cooldown de Skill2 reduzido para 0.1 segundos
-    ["Skill3"] = 0.1,  -- Cooldown de Skill3 reduzido para 0.1 segundos
+    ["AstralCut"] = 0.1,  -- Cooldown de Skill1 reduzido para 0.1 segundos
+    ["AstralBreak"] = 0.1,  -- Cooldown de Skill2 reduzido para 0.1 segundos
+    ["AsteriskSlash"] = 0.1,  -- Cooldown de Skill3 reduzido para 0.1 segundos
 }
 
 local DEFAULT_COOLDOWN = 1
@@ -44,6 +44,6 @@ end
 
 -- Testando a função para o jogador
 local player = Players.LocalPlayer
-activateSkill(player, "Skill1")
-activateSkill(player, "Skill2")
-activateSkill(player, "Skill3")
+activateSkill(player, "AstralCut")
+activateSkill(player, "AstralBreak")
+activateSkill(player, "AsteriskSlash")
