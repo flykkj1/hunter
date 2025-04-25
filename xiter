@@ -1,6 +1,5 @@
--- Configurações do personagem Rank ??? Hunter
+-- Configurações do cooldown das habilidades do Rank ??? Hunter
 local playerSettings = {
-    movementSpeed = {enabled = true, value = 100, description = "Velocidade de movimento", min = 16, max = 200},
     skillCooldowns = {
         AstralCut = {enabled = true, value = 0.1, description = "Cooldown de Astral Cut", min = 0, max = 10},
         AstralBreak = {enabled = true, value = 0.1, description = "Cooldown de Astral Break", min = 0, max = 10},
@@ -9,21 +8,8 @@ local playerSettings = {
     }
 }
 
--- Função para aplicar as configurações no personagem
+-- Função para aplicar as configurações de cooldown
 local function applyCharacterSettings(player)
-    local character = player.Character
-    if not character or not character:FindFirstChild("Humanoid") then
-        return
-    end
-
-    local humanoid = character:FindFirstChild("Humanoid")
-    
-    -- Alterar a velocidade de movimento
-    if playerSettings.movementSpeed.enabled then
-        humanoid.WalkSpeed = playerSettings.movementSpeed.value
-    end
-
-    -- Alterar o cooldown das habilidades
     local replicatedStorage = game:GetService("ReplicatedStorage")
     local skills = replicatedStorage:FindFirstChild("Skills")
     if skills then
@@ -53,19 +39,12 @@ local function applyCharacterSettings(player)
     end
 end
 
--- Função para alterar as configurações dinamicamente
+-- Função para alterar as configurações de cooldown
 local function updateSettings(setting, value)
-    if playerSettings[setting] then
-        playerSettings[setting].enabled = value
-        print("Configuração alterada: " .. setting .. " = " .. tostring(value))
-        
-        -- Aplicar as novas configurações imediatamente
-        local player = game.Players.LocalPlayer
-        applyCharacterSettings(player)
-    elseif playerSettings.skillCooldowns[setting] then
+    if playerSettings.skillCooldowns[setting] then
         playerSettings.skillCooldowns[setting].enabled = value
         print("Configuração alterada: " .. setting .. " = " .. tostring(value))
-
+        
         -- Aplicar as novas configurações de cooldown
         local player = game.Players.LocalPlayer
         applyCharacterSettings(player)
@@ -74,15 +53,15 @@ local function updateSettings(setting, value)
     end
 end
 
--- Função para criar uma tabela de opções movível e minimizável
+-- Função para criar a interface de configurações
 local function createOptionsGUI(player)
     -- Criar a GUI principal
     local screenGui = Instance.new("ScreenGui")
     screenGui.Parent = player:WaitForChild("PlayerGui")
 
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 300, 0, 400)
-    frame.Position = UDim2.new(0.5, -150, 0.5, -200)
+    frame.Size = UDim2.new(0, 300, 0, 300)
+    frame.Position = UDim2.new(0.5, -150, 0.5, -150)
     frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     frame.Parent = screenGui
 
@@ -102,7 +81,7 @@ local function createOptionsGUI(player)
     local isMinimized = false
     minimizeButton.MouseButton1Click:Connect(function()
         isMinimized = not isMinimized
-        frame.Size = isMinimized and UDim2.new(0, 300, 0, 30) or UDim2.new(0, 300, 0, 400)
+        frame.Size = isMinimized and UDim2.new(0, 300, 0, 30) or UDim2.new(0, 300, 0, 300)
         for _, child in pairs(frame:GetChildren()) do
             if child ~= header then
                 child.Visible = not isMinimized
@@ -113,20 +92,6 @@ local function createOptionsGUI(player)
 
     local uiListLayout = Instance.new("UIListLayout")
     uiListLayout.Parent = frame
-
-    -- Criar botões dinâmicos para cada configuração
-    local movementButton = Instance.new("TextButton")
-    movementButton.Size = UDim2.new(0, 250, 0, 30)
-    movementButton.Text = playerSettings.movementSpeed.enabled and "Ativar Velocidade" or "Desativar Velocidade"
-    movementButton.BackgroundColor3 = playerSettings.movementSpeed.enabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-    movementButton.Parent = frame
-
-    movementButton.MouseButton1Click:Connect(function()
-        playerSettings.movementSpeed.enabled = not playerSettings.movementSpeed.enabled
-        movementButton.Text = playerSettings.movementSpeed.enabled and "Ativar Velocidade" or "Desativar Velocidade"
-        movementButton.BackgroundColor3 = playerSettings.movementSpeed.enabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-        applyCharacterSettings(player)
-    end)
 
     -- Criar botões para o cooldown das skills
     for skillName, cooldownConfig in pairs(playerSettings.skillCooldowns) do
