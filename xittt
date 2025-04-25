@@ -1,0 +1,118 @@
+-- Tabela de configurações para alterar atributos do personagem no Anime Dimensions
+local playerSettings = {
+    movementSpeed = {enabled = true, value = 100, description = "Velocidade de movimento"},
+    jumpHeight = {enabled = true, value = 150, description = "Altura do pulo"},
+    gravity = {enabled = true, value = 50, description = "Gravidade"},
+    skillCooldown = {enabled = true, value = 0.1, description = "Cooldown das habilidades"},
+    dashCooldown = {enabled = true, value = 0.1, description = "Cooldown do Dash"}
+}
+
+-- Função para aplicar as alterações no personagem
+local function applyCharacterSettings(player)
+    local character = player.Character
+    if not character or not character:FindFirstChild("Humanoid") then
+        return
+    end
+
+    local humanoid = character:FindFirstChild("Humanoid")
+    
+    -- Alterar a velocidade de movimento
+    if playerSettings.movementSpeed.enabled then
+        humanoid.WalkSpeed = playerSettings.movementSpeed.value
+    end
+    
+    -- Alterar a altura do pulo
+    if playerSettings.jumpHeight.enabled then
+        humanoid.JumpHeight = playerSettings.jumpHeight.value
+    end
+
+    -- Alterar a gravidade
+    if playerSettings.gravity.enabled then
+        game:GetService("Workspace").Gravity = playerSettings.gravity.value
+    end
+
+    -- Alterar o cooldown das habilidades
+    local replicatedStorage = game:GetService("ReplicatedStorage")
+    local skills = replicatedStorage:FindFirstChild("Skills")
+    if skills and playerSettings.skillCooldown.enabled then
+        for _, skill in pairs(skills:GetChildren()) do
+            if skill:IsA("StringValue") then
+                local cooldown = skill:FindFirstChild("Cooldown")
+                if cooldown then
+                    cooldown.Value = playerSettings.skillCooldown.value
+                end
+            end
+        end
+    end
+
+    -- Alterar o cooldown do Dash
+    local dashSkill = replicatedStorage:FindFirstChild("Dash") -- Supondo que o Dash seja armazenado assim
+    if dashSkill and playerSettings.dashCooldown.enabled then
+        local cooldown = dashSkill:FindFirstChild("Cooldown")
+        if cooldown then
+            cooldown.Value = playerSettings.dashCooldown.value
+        end
+    end
+end
+
+-- Função para alterar configurações dinamicamente
+local function updateSettings(setting, value)
+    if playerSettings[setting] then
+        playerSettings[setting].enabled = value
+        print("Configuração alterada: " .. setting .. " = " .. tostring(value))
+        
+        -- Aplicar as novas configurações imediatamente
+        local player = game.Players.LocalPlayer
+        applyCharacterSettings(player)
+    else
+        warn("Configuração não válida!")
+    end
+end
+
+-- Função para criar a GUI de opções (interação do usuário)
+local function createOptionsGUI(player)
+    -- Criar a GUI principal
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = player:WaitForChild("PlayerGui")
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 400, 0, 300)
+    frame.Position = UDim2.new(0.5, -200, 0.5, -150)
+    frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    frame.Parent = screenGui
+
+    local uiListLayout = Instance.new("UIListLayout")
+    uiListLayout.Parent = frame
+
+    -- Criar botões dinâmicos para cada configuração
+    for setting, config in pairs(playerSettings) do
+        local button = Instance.new("TextButton")
+        button.Size = UDim2.new(0, 350, 0, 30)
+        button.Text = config.enabled and "Ativar " .. config.description or "Desativar " .. config.description
+        button.BackgroundColor3 = config.enabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+        button.Parent = frame
+
+        button.MouseButton1Click:Connect(function()
+            -- Alternar o estado da configuração
+            config.enabled = not config.enabled
+            button.Text = config.enabled and "Ativar " .. config.description or "Desativar " .. config.description
+            button.BackgroundColor3 = config.enabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+
+            -- Aplicar as novas configurações
+            applyCharacterSettings(player)
+        end)
+    end
+end
+
+-- Função para aplicar configurações iniciais ao jogador
+local function initializeSettings(player)
+    -- Aplicar configurações iniciais
+    applyCharacterSettings(player)
+
+    -- Criar a interface de opções
+    createOptionsGUI(player)
+end
+
+-- Inicializar as configurações e a interface quando o jogador entra
+local player = game.Players.LocalPlayer
+initializeSettings(player)
