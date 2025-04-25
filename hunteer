@@ -1,20 +1,20 @@
--- Script para reduzir o cooldown das skills de Rank ??? Hunter
-
+-- Script para reduzir o cooldown das skills com novos nomes
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UseSkill = ReplicatedStorage:WaitForChild("UseSkill")
 local Players = game:GetService("Players")
 
-local rankHunterCooldown = {
-    ["AstralCut"] = 0.1,  -- Cooldown de Skill1 reduzido para 0.1 segundos
-    ["AstralBreak"] = 0.1,  -- Cooldown de Skill2 reduzido para 0.1 segundos
-    ["AsteriskSlash"] = 0.1,  -- Cooldown de Skill3 reduzido para 0.1 segundos
+-- Renomeando as skills e configurando os cooldowns
+local skillCooldowns = {
+    ["Astral Cut"] = 0.1,   -- Cooldown reduzido para Astral Cut
+    ["Astral Break"] = 0.1, -- Cooldown reduzido para Astral Break
+    ["Asterisk Slash"] = 0.1, -- Cooldown reduzido para Asterisk Slash
 }
 
 local DEFAULT_COOLDOWN = 1
 
 -- Função para ativar a skill com cooldown reduzido
 local function activateSkill(player, skillName)
-    local cooldown = rankHunterCooldown[skillName] or DEFAULT_COOLDOWN
+    local cooldown = skillCooldowns[skillName] or DEFAULT_COOLDOWN
 
     -- Verifica se o personagem do jogador é o Rank ??? Hunter
     if player.Character and player.Character:FindFirstChild("Rank ??? Hunter") then
@@ -44,6 +44,6 @@ end
 
 -- Testando a função para o jogador
 local player = Players.LocalPlayer
-activateSkill(player, "AstralCut")
-activateSkill(player, "AstralBreak")
-activateSkill(player, "AsteriskSlash")
+activateSkill(player, "Astral Cut")
+activateSkill(player, "Astral Break")
+activateSkill(player, "Asterisk Slash")
